@@ -23,13 +23,13 @@ class Sample():
         except:
             raise Exception(f"No ROIs found in '{sample_path}'")
 
-        rois_if = self._get_if_rois()
-        rois_imc = self._get_imc_rois()
+        rois_if = self.__get_if_rois()
+        rois_imc = self.__get_imc_rois()
         rois = pd.merge(rois_if, rois_imc, on="roi_num")
 
         self.rois = [self.ROI(x, self.__if_markers) for _, x in rois.iterrows()]
 
-    def _get_if_rois(self):
+    def __get_if_rois(self):
 
         try:
             roi_tmp = glob.glob(os.path.join(self.sample_path, '*[rR][oO][iI]*'))[0]
@@ -50,7 +50,7 @@ class Sample():
 
         return pd.DataFrame(roi_files)
 
-    def _get_imc_rois(self):
+    def __get_imc_rois(self):
 
         roi_images = []
         with MCDFile(self.mcd_filepath) as f:
