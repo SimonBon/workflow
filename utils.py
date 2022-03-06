@@ -14,14 +14,13 @@ class Sample():
     def __init__(self, sample_path):
         self.sample_path = sample_path
         self.sample_name = os.path.split(sample_path)[-1]
-
         self.__imc_markers = ['Iridium_1033((1254))Ir193', 'Iridium_1033((1253))Ir191', 'H4K12Ac_2023((3829))Er167', 'Histone_1978((3831))Nd146']
         self.__if_markers = ["DAPI", "GD2", "CD56"]  # -> hier mal nochmal Daria fragen
 
         try:
             self.mcd_filepath = glob.glob(os.path.join(sample_path, '*.[mM][cC][dD]'))[0]
         except:
-            raise Exception(f"No ROIs found in '{sample_path}'")
+            raise Exception(f"No MCD-File found in '{sample_path}'")
 
         rois_if = self.__get_if_rois()
         rois_imc = self.__get_imc_rois()
@@ -84,10 +83,11 @@ class Sample():
     class ROI():
         def __init__(self, df, if_marker):
             self.roi_num = df["roi_num"]
-            self.if_nuc = cv2.cvtColor(cv2.imread(df["if_b"]), cv2.COLOR_BGR2GRAY)
+            self.if_nuc = cv2.cvtColor(cv2.imread(df["if_b"]), cv2.COLOR_BGR2GRAY).astype(np.float32)/255
             self.if_marker = if_marker
             self.if_imgs = np.array([cv2.cvtColor(cv2.imread(df[x]), cv2.COLOR_BGR2GRAY) for x in ["if_b", "if_g", "if_r"]])
             self.imc_nuc = df["imc_img"]
+            self.imc_nuc = self.imc_nuc/self.imc_nuc.max()
             self.imc_marker = df["imc_marker"]
             self.imc_imgs = df["imc_imgs"]
 
@@ -96,3 +96,18 @@ def _rmlead(inp, char='0'):
     for idx, letter in enumerate(inp):
         if letter != char:
             return inp[idx:]
+
+
+def additive_blend(im0, im1):
+
+    im0 = np.array(im0)
+    im0 = im0/np.percentile(im0, 99)
+
+    im1 = np.array(im1)
+    im1 = im1/np.percentile(im1, 99)
+
+    rgb = np.zeros((*im0.shape, 3))
+    rgb[:, :, 0] = im0
+    rgb[:, :, 1] = im1
+
+    return ret
