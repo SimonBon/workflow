@@ -5,7 +5,7 @@ from utils import Sample, additive_blend
 import numpy as np
 
 
-sample = "/Users/simongutwein/ccriod/OneDrive - CCRI/Github/Data/20211222_02-4074_BM"
+sample = "/Users/simongutwein/ccriod/OneDrive - CCRI/Github/Data/20211214_18-2600_BM"
 rois = Sample(sample)
 
 fig, ax = plt.subplots(5, len(rois.rois), figsize=(15, 10))
@@ -27,4 +27,3 @@ for i, roi in enumerate(rois.rois):
     plt.tight_layout()
 
 plt.show()
-

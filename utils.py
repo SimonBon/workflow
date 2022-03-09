@@ -35,7 +35,7 @@ class Sample():
         except:
             raise Exception(f"No ROIs found in '{self.sample_path}'")
 
-        roi_tmp = os.path.join(roi_tmp, os.listdir(roi_tmp)[0])
+        roi_tmp = os.path.join(roi_tmp, [x for x in os.listdir(roi_tmp) if not x .startswith(".")][0])
         roi_tmp = [os.path.join(roi_tmp, x) for x in os.listdir(roi_tmp) if not x.startswith(".")]
 
         roi_files = []
@@ -110,4 +110,4 @@ def additive_blend(im0, im1):
     rgb[:, :, 0] = im0
     rgb[:, :, 1] = im1
 
-    return ret
+    return rgb
