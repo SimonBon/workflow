@@ -1,19 +1,21 @@
-from elementpath import XPath1Parser
 import numpy as np
 from pybasic import correct_illumination, basic
 from scipy.ndimage import median_filter
 import random
+import cv2
 
 
-def preprocess(img):
+def preprocess(img, percentage=1):
 
     img = rm_hotpixel(img)
     ff, bg = basic([img], verbosity=False)
     img = correct_illumination([img], ff, bg)[0]
-    b1 = np.percentile(img, 5)
-    t1 = np.percentile(img, 95)
+    img = ((img / img.max())*255).astype(np.uint8)
+    b1 = np.percentile(img, percentage)
+    t1 = np.percentile(img, 100-percentage)
     img = (img-b1)/(t1-b1)
     img = np.clip(img, 0, 1)
+
     return (img*255).astype(np.uint8)
 
 
@@ -34,6 +36,7 @@ def handle_hotpixel(spot, img, sz=(1, 1)):
 
     ret = np.copy(img)
     ret[spot[0], spot[1]] = np.nan
+
     x0 = spot[1]-1 if spot[1] >= sz[1] else 0
     y0 = spot[0]-1 if spot[0] >= sz[0] else 0
     x1 = spot[1]+2 if spot[1] <= ret.shape[1]-sz[1] else ret.shape[1]

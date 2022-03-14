@@ -1,11 +1,11 @@
 import matplotlib.pyplot as plt
 import preprocessing.preprocess as pp
 import registration.register as reg
-from utils import Sample, additive_blend
+from Sample import Sample
+from utils import additive_blend
 import numpy as np
 
-
-sample = "/Users/simongutwein/ccriod/OneDrive - CCRI/Github/Data/20211214_18-2600_BM"
+sample = "/data_isilon_main/isilon_images/10_MetaSystems/MetaSystemsData/Multimodal_Imaging_Daria/_tmp_simon/20211214_18-2600_BM"
 rois = Sample(sample)
 
 fig, ax = plt.subplots(5, len(rois.rois), figsize=(15, 10))
