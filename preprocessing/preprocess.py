@@ -3,13 +3,14 @@ from pybasic import correct_illumination, basic
 from scipy.ndimage import median_filter
 import random
 import cv2
+from time import time
 
 
 def preprocess(img, percentage=1):
 
-    img = rm_hotpixel(img)
-    ff, bg = basic([img], verbosity=False)
-    img = correct_illumination([img], ff, bg)[0]
+    #img = rm_hotpixel(img)
+    #ff, bg = basic([img], verbosity=False)
+    #img = correct_illumination([img], ff, bg)[0]
     img = ((img / img.max())*255).astype(np.uint8)
     b1 = np.percentile(img, percentage)
     t1 = np.percentile(img, 100-percentage)

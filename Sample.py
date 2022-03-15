@@ -8,6 +8,7 @@ import pandas as pd
 from readimc import MCDFile
 import numpy as np
 from utils import _rmlead
+from skimage.transform import resize
 
 
 class Sample():
@@ -86,12 +87,13 @@ class Sample():
             return pd.DataFrame(roi_images)
 
     class ROI():
-        def __init__(self, df, if_marker):
+        def __init__(self, df, if_marker, rz_shape=(4096, 4096)):
             self.roi_num = df["roi_num"]
             self.if_nuc = cv2.cvtColor(cv2.imread(df["if_b"]), cv2.COLOR_BGR2GRAY).astype(np.float32)/255
             self.if_marker = if_marker
             self.if_imgs = np.array([cv2.cvtColor(cv2.imread(df[x]), cv2.COLOR_BGR2GRAY) for x in ["if_b", "if_g", "if_r"]])
             self.imc_nuc = df["imc_img"]
+            self.imc_nuc_upscaled = resize(self.imc_nuc, rz_shape, anti_aliasing=True)
             self.imc_nuc = self.imc_nuc/self.imc_nuc.max()
             self.imc_marker = df["imc_marker"]
             self.imc_imgs = df["imc_imgs"]
