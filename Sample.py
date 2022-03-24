@@ -32,6 +32,9 @@ class Sample():
         rois = pd.merge(rois_if, rois_imc, on="roi_num")
 
         self.rois = [self.ROI(x, self.__if_markers) for _, x in rois.iterrows()]
+        
+        roi_nums = [roi.roi_num for roi in self.rois]
+        print(f"Found the following ROIs: {roi_nums}")
 
     def __get_if_rois(self):
 
