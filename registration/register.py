@@ -1,62 +1,57 @@
-import cv2
+import cv2 as cv
 import numpy as np
+from time import time
 
 class FeatureExtractor():
 
-    def __init__(self, type) -> None:
+    def __init__(self, type, *args, **kwargs) -> None:
         
         self.type = type.upper()
 
         if self.type == "SIFT":
-            from skimage.feature import SIFT
-            self.extractor = SIFT()
+            self.extractor = cv.SIFT_create(*args, **kwargs)
+            self.norm = cv.NORM_L2
 
-        if self.type == "ORB":
-            from skimage.feature import ORB
-            self.extractor = ORB()
+        elif self.type == "ORB":
+            self.extractor = cv.ORB_create(*args, **kwargs)
+            self.norm = cv.NORM_HAMMING
 
-        if self.type == "CENSURE":
-            from skimage.feature import CENSURE
-            self.extractor = CENSURE()
+        elif self.type == "AKAZE":
+            self.extractor = cv.AKAZE_create(*args, **kwargs)
+            self.norm = cv.NORM_HAMMING
+
+        elif self.type == "BRISK":
+            self.extractor = cv.BRISK_create(*args, **kwargs)
+            self.norm = cv.NORM_HAMMING
+
+        else:
+            raise ValueError(f"{type} is not a valid feature detection algorithm. Chose one of 'SIFT, ORB, AKAZE, BRISK'")
 
     def __call__(self, im0, im1) -> None:
 
-        self.extractor.detect_and_extract(im0)
-        kp0 = self.extractor.keypoints
-        dc0 = self.extractor.descriptors
         
-        self.extractor.detect_and_extract(im1)
-        kp1 = self.extractor.keypoints
-        dc1 = self.extractor.descriptors
+        self.im0 = im0
+        self.im1 = im1
 
-        print(len(kp0), len(kp1), len(dc0), len(dc1))
+        self.kp0, self.des0 = self.extractor.detectAndCompute(im0, None)
+        self.kp1, self.des1 = self.extractor.detectAndCompute(im1, None)
 
+    def match(self, ratio_thresh=0.7) -> None:
 
-# def find_matches(img0, img1, distance_match=0.8, max_features=30000, return_matches=False):
+        matcher = cv.BFMatcher(self.norm) 
+        knn_matches = matcher.knnMatch(self.des0, self.des1, 2)
+        self.matches = [[m] for m, n in knn_matches if m.distance < ratio_thresh*n.distance]
+    
+    def estimate(self) -> None:
+        
+        self.points = np.array([np.array((self.kp0[m[0].queryIdx].pt, self.kp1[m[0].trainIdx].pt)) for m in self.matches]).astype(np.int64)
+        print(f"Found {len(self.points)} matches.")
+        h, _ = cv.estimateAffinePartial2D(self.points[:, 0], self.points[:, 1])
+        
+        self.h = h
 
-#     sift = cv2.SIFT_create(nfeatures=max_features)
+    def warp(self) -> None:
 
-#     kp1, des1 = sift.detectAndCompute(img0, None)
-#     kp2, des2 = sift.detectAndCompute(img1, None)
+        self.fixed = self.im1
+        self.warped = cv.warpAffine(self.im0, self.h, (self.fixed.shape[0], self.fixed.shape[1]))
 
-#     bf = cv2.BFMatcher()
-#     matches = bf.knnMatch(des1, des2, k=2)
-#     good = [[m] for (m, n) in matches if m.distance < distance_match*n.distance]
-#     points = np.array([np.array((kp1[m[0].queryIdx].pt, kp2[m[0].trainIdx].pt)) for m in good]).astype(np.int64)
-#     kp_match = cv2.drawMatchesKnn(img0, kp1, img1, kp2, good, None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
-
-#     if len(good) < 10:
-#         print(f"Found only {len(good)} matches.\n")
-
-#     else:
-
-#         print(f"Found {len(good)} matches.")
-#         h, _ = cv2.estimateAffinePartial2D(points[:, 0], points[:, 1])
-#         if return_matches:
-#             return kp_match, h
-#         else:
-#             return h
-
-
-# def transform(img0, img1, h):
-#     return cv2.warpAffine(img0, h, (img1.shape[1], img1.shape[0]))
