@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 
-def find_matches(img0, img1, distance_match=0.75, max_features=30000, return_matches=False):
+def find_matches(img0, img1, distance_match=0.8, max_features=30000, return_matches=False):
 
     sift = cv2.SIFT_create(nfeatures=max_features)
 
