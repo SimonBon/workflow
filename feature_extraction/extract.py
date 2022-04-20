@@ -1,6 +1,6 @@
-import queue
-import threading
 import sys
+import threading
+import queue
 import utils
 import matplotlib.pyplot as plt
 import cv2
@@ -110,7 +110,7 @@ def extract_features(cell, mask, imgs, markers):
     morph_features = ["area", "major_axis_length", "minor_axis_length", "orientation", "perimeter"]
     #"centroid", "convex_area", "eccentricity", "equivalent_diameter", 'feret_diameter_max',
 
-    cell_dict = {"cell": cell}
+    cell_dict = {"id": cell}
 
     for m in range(len(markers)):
         marker_exp = imgs[m][cell_mask]
