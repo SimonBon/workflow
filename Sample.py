@@ -7,7 +7,7 @@ import cv2
 import pandas as pd
 from readimc import MCDFile
 import numpy as np
-from utils import _rmlead
+from .utils import _rmlead
 
 
 class Sample():

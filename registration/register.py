@@ -1,6 +1,9 @@
 import cv2 as cv
+from cv2 import add
 import numpy as np
 from time import time
+from workflow.utils import additive_blend
+import matplotlib.pyplot as plt
 
 class FeatureExtractor():
 
@@ -50,11 +53,22 @@ class FeatureExtractor():
         else:
             self.h = None
 
+    def draw_matches(self) -> None:
+        matched_image = cv.drawMatchesKnn(self.im0, self.kp0, self.im1, self.kp1, self.matches, None, flags=2)
+        plt.imshow(matched_image)
+        plt.show() 
+
+    def show_overlay(self):
+        if hasattr(self, "fixed"):
+            if isinstance(self.fixed, np.ndarray):
+                plt.imshow(additive_blend(self.fixed, self.warped))
+                plt.show()
+
 
     def warp(self) -> None:
         if isinstance(self.h, np.ndarray):
             self.fixed = self.im1
-            self.warped = cv.warpAffine(self.im0, self.h, (self.fixed.shape[0], self.fixed.shape[1]))
+            self.warped = cv.warpAffine(self.im0, self.h, (self.fixed.shape[1], self.fixed.shape[0]))
 
         else:
             self.fixed, self.warped = None, None
