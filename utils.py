@@ -1,6 +1,11 @@
 import numpy as np
 import cv2
 from skimage.segmentation import find_boundaries
+from scipy import ndimage
+
+
+#debug
+import matplotlib.pyplot as plt
 
 def additive_blend(im0, im1):
 
@@ -37,3 +42,27 @@ def plot_segmentation(nuc, segmentation):
 
     overlay_data[boundaries > 0] = (255,0,0)
     return overlay_data
+
+def gaussian_kernel(sz: int, sigx: float, sigy: float, deg: float, normalize=True) -> np.ndarray:
+    X, Y = np.meshgrid(np.linspace(-1,1,sz), np.linspace(-1,1,sz))
+    GX = 1/(sigx*np.sqrt(2*np.pi))*np.exp(-1/2*(X/sigx)**2)
+    GY = 1/(sigy*np.sqrt(2*np.pi))*np.exp(-1/2*(Y/sigy)**2)
+    GK = GX*GY
+    rGK = ndimage.rotate(GK, deg, reshape=False)
+    if normalize:
+        rGK /= rGK.sum()
+    else:
+        rGK /= rGK.max()
+    return rGK
+
+
+def LoG_kernel(sz: int, sig: float):
+
+    X, Y = np.meshgrid(np.linspace(-4,4,sz), np.linspace(-4,4,sz))
+    X2 = X**2
+    Y2 = Y**2
+    X2_plus_Y2 = X2 + Y2
+    hg = np.exp((-X2_plus_Y2)/(2*sig**2))
+    LoG = (-1)/(np.pi*sig**4)*(1-(X2_plus_Y2/(2*sig**2)))*np.exp(-X2_plus_Y2/(2*sig**2))
+    LoG = LoG/abs(LoG.min())
+    return LoG

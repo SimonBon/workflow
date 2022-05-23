@@ -1,3 +1,4 @@
+from email import header
 import os
 import re
 from typing import Union
@@ -7,8 +8,15 @@ import cv2
 import pandas as pd
 from readimc import MCDFile
 import numpy as np
-from .utils import _rmlead
+from workflow.utils import _rmlead
+import exifread
 
+def get_rois(f):
+    with open(f, 'rb') as fin:
+        tags = exifread.process_file(fin)
+
+    roi_num = str(tags["Image Tag 0xB0B7"]).split(":")[-1].split("_")[-1]
+    return roi_num
 
 class Sample():
 
@@ -39,21 +47,23 @@ class Sample():
     def __get_if_rois(self):
 
         try:
-            roi_tmp = glob.glob(os.path.join(self.sample_path, '*[rR][oO][iI]*'))[0]
+            roi_tmp = glob.glob(os.path.join(self.sample_path, '*[sS][pP][oO][tT][sS]*'))[0]
         except:
             raise Exception(f"No ROIs found in '{self.sample_path}'")
 
-        roi_tmp = os.path.join(roi_tmp, [x for x in os.listdir(roi_tmp) if not x .startswith(".")][0])
-        roi_tmp = [os.path.join(roi_tmp, x) for x in os.listdir(roi_tmp) if not x.startswith(".")]
+        files = [os.path.join(roi_tmp,x) for x in os.listdir(roi_tmp) if not x.startswith(".")]
+        rois = [[f,get_rois(f), f.split(".tif")[0][-1]] for f in files]
+
+        df = pd.DataFrame(rois, columns=["file", "roi_num", "channel"])
 
         roi_files = []
-        for f in roi_tmp:
-            imgs = natsort.natsorted([os.path.join(f, x) for x in os.listdir(f)])
+        for f in list(set(df.roi_num)):
+            tmp = df[df.roi_num==f]
             roi_files.append({
-                "roi_num": int(f.split("/")[-1]),
-                "if_b": imgs[0],
-                "if_g": imgs[1],
-                "if_r": imgs[2]})
+                "roi_num": int(f),
+                "if_b": tmp.file[tmp.channel.str.lower()=="b"].iloc[0],
+                "if_g": tmp.file[tmp.channel.str.lower()=="g"].iloc[0],
+                "if_r": tmp.file[tmp.channel.str.lower()=="r"].iloc[0]})
 
         return pd.DataFrame(roi_files)
 
@@ -99,3 +109,6 @@ class Sample():
             self.imc_nuc = self.imc_nuc/self.imc_nuc.max()
             self.imc_marker = df["imc_marker"]
             self.imc_imgs = df["imc_imgs"]
+
+if __name__ == "__main__":
+    S = Sample("/Volumes/Custom/10_MetaSystems/MetaSystemsData/Multimodal_Imaging_Daria/20211222_02-4074_BM")
