@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 def preprocess(img, percentage=1, plot_hotspots=False, clipLimit=6):
 
     img = rm_hotpixel(img, plot_hotspots=plot_hotspots)
-    ff, bg = basic([img], verbosity=False)
-    img = correct_illumination([img], ff, bg)[0]
+    #ff, bg = basic([img], verbosity=False)
+    #img = correct_illumination([img], ff, bg)[0]
     img = normalize_clahe(img, clipLimit=clipLimit)
     img = normalize_to_one_percent(img, percentage)
 

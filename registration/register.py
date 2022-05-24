@@ -68,7 +68,7 @@ class FeatureExtractor():
     def warp(self) -> None:
         if isinstance(self.h, np.ndarray):
             self.fixed = self.im1
-            self.warped = cv.warpAffine(self.im0, self.h, (self.fixed.shape[1], self.fixed.shape[0]))
+            self.warped = cv.warpAffine(self.im0, self.h, (self.fixed.shape[0], self.fixed.shape[1]))
 
         else:
             self.fixed, self.warped = None, None
