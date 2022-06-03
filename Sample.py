@@ -8,7 +8,7 @@ import cv2
 import pandas as pd
 from readimc import MCDFile
 import numpy as np
-from workflow.utils import _rmlead
+from utils import _rmlead
 import exifread
 
 def get_rois(f):
@@ -28,10 +28,9 @@ class Sample():
         self.sample_path = sample_path
         self.sample_name = os.path.split(sample_path)[-1]
         self.__imc_markers = ['Iridium_1033((1254))Ir193', 'Iridium_1033((1253))Ir191', 'H4K12Ac_2023((3829))Er167', 'Histone_1978((3831))Nd146']
-        self.__if_markers = ["DAPI", "GD2", "CD56"]  # -> hier mal nochmal Daria fragen
-
+        self.__if_markers = ["DAPI", "GD2", "CD56"]  
         try:
-            self.mcd_path = glob.glob(os.path.join(sample_path, '*.[mM][cC][dD]'))[0]
+            self.mcd_path = glob.glob(sample_path + '/**/*.[mM][cC][dD]')[0]
         except:
             raise Exception(f"No MCD-File found in '{sample_path}'")
 
@@ -47,11 +46,11 @@ class Sample():
     def __get_if_rois(self):
 
         try:
-            roi_tmp = glob.glob(os.path.join(self.sample_path, '*[sS][pP][oO][tT][sS]*'))[0]
+            roi_tmp = glob.glob(self.sample_path + '/*[sS][pP][oO][tT][sS]*')[0]
         except:
             raise Exception(f"No ROIs found in '{self.sample_path}'")
 
-        files = [os.path.join(roi_tmp,x) for x in os.listdir(roi_tmp) if not x.startswith(".")]
+        files = [os.path.join(roi_tmp,x) for x in os.listdir(roi_tmp)]
         rois = [[f,get_rois(f), f.split(".tif")[0][-1]] for f in files]
 
         df = pd.DataFrame(rois, columns=["file", "roi_num", "channel"])
@@ -111,4 +110,4 @@ class Sample():
             self.imc_imgs = df["imc_imgs"]
 
 if __name__ == "__main__":
-    S = Sample("/Volumes/Custom/10_MetaSystems/MetaSystemsData/Multimodal_Imaging_Daria/20211222_02-4074_BM")
+    S = Sample("/data_isilon_main/isilon_images/10_MetaSystems/MetaSystemsData/Multimodal_Imaging_Daria/20211222_02-4074_BM")

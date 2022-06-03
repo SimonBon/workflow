@@ -7,6 +7,7 @@ from scipy import ndimage
 #debug
 import matplotlib.pyplot as plt
 
+
 def additive_blend(im0, im1):
 
     im0 = np.array(im0)
@@ -66,3 +67,13 @@ def LoG_kernel(sz: int, sig: float):
     LoG = (-1)/(np.pi*sig**4)*(1-(X2_plus_Y2/(2*sig**2)))*np.exp(-X2_plus_Y2/(2*sig**2))
     LoG = LoG/abs(LoG.min())
     return LoG
+
+def remove_zero_pad(image):
+    tmp = np.argwhere(image != 0) 
+    max_y = tmp[:, 0].max()
+    min_y = tmp[:, 0].min()
+    min_x = tmp[:, 1].min()
+    max_x = tmp[:, 1].max()
+    crop_image = image[min_y:max_y, min_x:max_x]
+
+    return crop_image

@@ -1,11 +1,13 @@
 import numpy as np
-from workflow.pybasic import correct_illumination, basic
+from pybasic import correct_illumination, basic
 import random
 import cv2
 import matplotlib.pyplot as plt
+from utils import remove_zero_pad
 
 def preprocess(img, percentage=1, plot_hotspots=False, clipLimit=6):
 
+    img =remove_zero_pad(img)
     img = rm_hotpixel(img, plot_hotspots=plot_hotspots)
     #ff, bg = basic([img], verbosity=False)
     #img = correct_illumination([img], ff, bg)[0]
@@ -99,9 +101,11 @@ def normalize_to_one_percent(img, percentage=1):
     return img
 
 def normalize_clahe(img, clipLimit=6):
-
+    #Histogram equalization 
     img = ((img / img.max())*255).astype(np.uint8)
     clahe = cv2.createCLAHE(clipLimit=clipLimit, tileGridSize=(8,8))
     equalized = clahe.apply(img)
 
     return equalized/equalized.max()
+
+

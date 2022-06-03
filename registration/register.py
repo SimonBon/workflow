@@ -2,12 +2,13 @@ import cv2 as cv
 from cv2 import add
 import numpy as np
 from time import time
-from workflow.utils import additive_blend
+from utils import additive_blend
 import matplotlib.pyplot as plt
 
 class FeatureExtractor():
 
     def __init__(self, type, *args, **kwargs) -> None:
+
         self.type = type.upper()
 
         if self.type == "SIFT":
@@ -40,7 +41,9 @@ class FeatureExtractor():
 
     def match(self, ratio_thresh=0.7) -> None:
         matcher = cv.BFMatcher(self.norm) 
-        knn_matches = matcher.knnMatch(self.des0, self.des1, 2)
+        des0 = self.des0[:260000]
+        des1 = self.des1[:260000]
+        knn_matches = matcher.knnMatch(des0, des1, 2)
         self.matches = [[m] for m, n in knn_matches if m.distance < ratio_thresh*n.distance]
     
 
@@ -55,20 +58,32 @@ class FeatureExtractor():
 
     def draw_matches(self) -> None:
         matched_image = cv.drawMatchesKnn(self.im0, self.kp0, self.im1, self.kp1, self.matches, None, flags=2)
-        plt.imshow(matched_image)
-        plt.show() 
 
-    def show_overlay(self):
+    def compute_overlay(self):
         if hasattr(self, "fixed"):
             if isinstance(self.fixed, np.ndarray):
-                plt.imshow(additive_blend(self.fixed, self.warped))
-                plt.show()
+                return additive_blend(self.fixed, self.warped)
 
 
     def warp(self) -> None:
         if isinstance(self.h, np.ndarray):
             self.fixed = self.im1
-            self.warped = cv.warpAffine(self.im0, self.h, (self.fixed.shape[0], self.fixed.shape[1]))
-
+            self.warped = cv.warpAffine(self.im0, self.h, (self.fixed.shape[1], self.fixed.shape[0]))
         else:
             self.fixed, self.warped = None, None
+
+    def calc_misalignment(self):
+        mpp = 3.14/20
+        y_diff_ideal = self.fixed.shape[0]/2 + (self.im0.shape[1]/mpp)/2
+        x_diff_ideal = self.fixed.shape[1]/2 - (self.im0.shape[0]/mpp)/2
+        
+        x_misalign_px = abs(x_diff_ideal) - self.h[0][2]
+        y_misalign_px = abs(y_diff_ideal) - self.h[1][2]
+
+        x_misalign_um = abs(x_misalign_px)*mpp
+        y_misalign_um = abs(y_misalign_px)*mpp
+
+        return x_misalign_um, y_misalign_um
+
+
+    
