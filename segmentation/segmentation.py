@@ -43,7 +43,8 @@ class Segmentation():
 
     def __call__(self, image):
 
-        img = np.expand_dims(np.stack((image, np.zeros_like(image)), -1), 0)
+        #img = np.expand_dims(np.stack((image, np.zeros_like(image)), -1), 0)
+        img = image
 
         if self.option.lower() == "mesmer":
             print("Predicting using Mesmer")
@@ -51,6 +52,7 @@ class Segmentation():
 
         elif self.option.lower() == "cellpose":
             print("Predicting using Cellpose")
-            diameter_px = self.nuclear_diameter / self.mpp
+            #diameter_px = self.nuclear_diameter / self.mpp
             channels = [[0, 0]]
-            return self.algorithm.eval(img, diameter=diameter_px, channels=channels)[0].squeeze()
+            #return self.algorithm.eval(img, diameter=diameter_px, channels=channels)[0].squeeze()
+            return self.algorithm.eval(img, diameter=0, channels=channels, net_avg=False)[0].squeeze()

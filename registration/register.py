@@ -74,8 +74,8 @@ class FeatureExtractor():
 
     def calc_misalignment(self):
         mpp = 3.14/20
-        y_diff_ideal = self.fixed.shape[0]/2 + (self.im0.shape[1]/mpp)/2
-        x_diff_ideal = self.fixed.shape[1]/2 - (self.im0.shape[0]/mpp)/2
+        y_diff_ideal = self.fixed.shape[0]/2 + (self.im0.shape[0]/mpp)/2
+        x_diff_ideal = self.fixed.shape[1]/2 - (self.im0.shape[1]/mpp)/2
         
         x_misalign_px = abs(x_diff_ideal) - self.h[0][2]
         y_misalign_px = abs(y_diff_ideal) - self.h[1][2]
